@@ -31,7 +31,12 @@ func main() {
 	queueName := fmt.Sprintf("pause.%s", name)
 	pubsub.CreateChannel(conn, routing.ExchangePerilDirect, queueName, routing.PauseKey, pubsub.Transient)
 
-	game := gamelogic.NewGameState(name)
+	gs := gamelogic.NewGameState(name)
+
+	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilDirect, queueName, routing.PauseKey, pubsub.Transient, handlerPause(gs))
+	if err != nil {
+		log.Fatalf("Error subscribing to queue: %v", err)
+	}
 
 loop:
 	for {
@@ -41,20 +46,20 @@ loop:
 		}
 		switch cmd[0] {
 		case "spawn":
-			err := game.CommandSpawn(cmd)
+			err := gs.CommandSpawn(cmd)
 			if err != nil {
 				fmt.Println("Error:", err)
 				continue
 			}
 		case "move":
-			move, err := game.CommandMove(cmd)
+			move, err := gs.CommandMove(cmd)
 			if err != nil {
 				fmt.Println("Error:", err)
 				continue
 			}
 			fmt.Printf("move %v 1", move.ToLocation)
 		case "status":
-			game.CommandStatus()
+			gs.CommandStatus()
 		case "help":
 			gamelogic.PrintClientHelp()
 		case "spam":

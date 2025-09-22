@@ -24,12 +24,12 @@ func CreateChannel(conn *amqp.Connection, exchange, queueName, key string, queue
 
 	q, err := ch.QueueDeclare(queueName, durable, autoDelete, exclusive, noWait, nil)
 	if err != nil {
-		return &amqp.Channel{}, amqp.Queue{}, err
+		return nil, amqp.Queue{}, err
 	}
 
 	err = ch.QueueBind(queueName, key, exchange, noWait, nil)
 	if err != nil {
-		return &amqp.Channel{}, amqp.Queue{}, err
+		return nil, amqp.Queue{}, err
 	}
 
 	return ch, q, nil
