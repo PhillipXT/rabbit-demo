@@ -31,10 +31,20 @@ func main() {
 	gs := gamelogic.NewGameState(name)
 
 	queueName := fmt.Sprintf("%s.%s", routing.PauseKey, name)
-
 	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilDirect, queueName, routing.PauseKey, pubsub.Transient, handlerPause(gs))
 	if err != nil {
 		log.Fatalf("Error subscribing to queue: %v", err)
+	}
+
+	queueName = fmt.Sprintf("%s.%s", routing.ArmyMovesPrefix, name)
+	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilTopic, queueName, routing.ArmyMovesPrefix+".*", pubsub.Transient, handlerMove(gs))
+	if err != nil {
+		log.Fatalf("Error subscribing to queue: %v", err)
+	}
+
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Could not create channel: %v", err)
 	}
 
 	for {
@@ -56,6 +66,10 @@ func main() {
 				continue
 			}
 			fmt.Printf("move %v 1", move.ToLocation)
+			err = pubsub.PublishJSON(ch, routing.ExchangePerilTopic, routing.ArmyMovesPrefix+".*", move)
+			if err != nil {
+				log.Fatalf("Could not publish move: %v", err)
+			}
 		case "status":
 			gs.CommandStatus()
 		case "help":
