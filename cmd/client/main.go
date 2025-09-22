@@ -65,10 +65,10 @@ func main() {
 				fmt.Println("Error:", err)
 				continue
 			}
-			fmt.Printf("move %v 1", move.ToLocation)
-			err = pubsub.PublishJSON(ch, routing.ExchangePerilTopic, routing.ArmyMovesPrefix+".*", move)
+			err = pubsub.PublishJSON(ch, routing.ExchangePerilTopic, routing.ArmyMovesPrefix+"."+move.Player.Username, move)
 			if err != nil {
-				log.Fatalf("Could not publish move: %v", err)
+				fmt.Printf("Could not publish move: %v", err)
+				continue
 			}
 		case "status":
 			gs.CommandStatus()
