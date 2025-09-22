@@ -4,17 +4,17 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-type simpleQueueType int
+type SimpleQueueType int
 
 const (
-	Durable simpleQueueType = iota
+	Durable SimpleQueueType = iota
 	Transient
 )
 
-func CreateChannel(conn *amqp.Connection, exchange, queueName, key string, queueType simpleQueueType) (*amqp.Channel, amqp.Queue, error) {
+func CreateChannel(conn *amqp.Connection, exchange, queueName, key string, queueType SimpleQueueType) (*amqp.Channel, amqp.Queue, error) {
 	ch, err := conn.Channel()
 	if err != nil {
-		return &amqp.Channel{}, amqp.Queue{}, err
+		return nil, amqp.Queue{}, err
 	}
 
 	durable := queueType == Durable

@@ -28,7 +28,7 @@ func main() {
 		log.Fatalf("Could not create channel: %v", err)
 	}
 
-	pubsub.CreateChannel(conn, routing.ExchangePerilTopic, "game_logs", routing.GameLogSlug, pubsub.Durable)
+	pubsub.CreateChannel(conn, routing.ExchangePerilTopic, routing.GameLogSlug, routing.GameLogSlug+".*", pubsub.Durable)
 
 	gamelogic.PrintServerHelp()
 
@@ -50,11 +50,9 @@ func main() {
 			}
 		} else if cmd[0] == "quit" {
 			fmt.Println("Exiting game loop...")
-			break
+			return
 		} else {
 			fmt.Println("Unknown command.")
 		}
 	}
-
-	fmt.Println("RabbitMQ connection closed..")
 }

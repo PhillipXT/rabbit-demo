@@ -7,7 +7,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func SubscribeJSON[T any](conn *amqp.Connection, exchange, queueName, key string, queueType simpleQueueType, handler func(T)) error {
+func SubscribeJSON[T any](conn *amqp.Connection, exchange, queueName, key string, queueType SimpleQueueType, handler func(T)) error {
 	ch, _, err := CreateChannel(conn, exchange, queueName, key, queueType)
 	if err != nil {
 		fmt.Println("Error creating channel (SubscribeJSON).")

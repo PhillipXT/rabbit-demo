@@ -28,17 +28,15 @@ func main() {
 		log.Fatalf("Error getting username: %v", err)
 	}
 
-	queueName := fmt.Sprintf("pause.%s", name)
-	pubsub.CreateChannel(conn, routing.ExchangePerilDirect, queueName, routing.PauseKey, pubsub.Transient)
-
 	gs := gamelogic.NewGameState(name)
+
+	queueName := fmt.Sprintf("%s.%s", routing.PauseKey, name)
 
 	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilDirect, queueName, routing.PauseKey, pubsub.Transient, handlerPause(gs))
 	if err != nil {
 		log.Fatalf("Error subscribing to queue: %v", err)
 	}
 
-loop:
 	for {
 		cmd := gamelogic.GetInput()
 		if len(cmd) == 0 {
@@ -66,11 +64,9 @@ loop:
 			fmt.Println("Spamming not allowed yet")
 		case "quit":
 			gamelogic.PrintQuit()
-			break loop
+			return
 		default:
 			fmt.Println("Unknown command.")
 		}
 	}
-
-	fmt.Println("RabbitMQ connection closed..")
 }
