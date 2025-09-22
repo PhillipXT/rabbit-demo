@@ -28,6 +28,8 @@ func main() {
 		log.Fatalf("Could not create channel: %v", err)
 	}
 
+	pubsub.CreateChannel(conn, routing.ExchangePerilTopic, "game_logs", routing.GameLogSlug, pubsub.Durable)
+
 	gamelogic.PrintServerHelp()
 
 	for {
