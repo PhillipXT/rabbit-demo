@@ -1,3 +1,3 @@
-# learn-pub-sub-starter (Peril)
+# rabbit-demo
 
-This is the starter code used in Boot.dev's [Learn Pub/Sub](https://learn.boot.dev/learn-pub-sub) course.
+Small test project to check out rabbit-mq.
