@@ -3,11 +3,20 @@ package pubsub
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func SubscribeJSON[T any](conn *amqp.Connection, exchange, queueName, key string, queueType SimpleQueueType, handler func(T)) error {
+type AckType int
+
+const (
+	Ack AckType = iota
+	NackRequeue
+	NackDiscard
+)
+
+func SubscribeJSON[T any](conn *amqp.Connection, exchange, queueName, key string, queueType SimpleQueueType, handler func(T) AckType) error {
 	ch, _, err := CreateChannel(conn, exchange, queueName, key, queueType)
 	if err != nil {
 		fmt.Println("Error creating channel (SubscribeJSON).")
@@ -28,10 +37,16 @@ func SubscribeJSON[T any](conn *amqp.Connection, exchange, queueName, key string
 				fmt.Printf("Error during unmarshal: %v\n", err)
 				continue
 			}
-			handler(v)
-			if err := msg.Ack(false); err != nil {
-				fmt.Printf("Error during ack: %v\n", err)
-				continue
+			switch handler(v) {
+			case Ack:
+				log.Println("Message acknowledged.")
+				msg.Ack(false)
+			case NackDiscard:
+				log.Println("Message discarded.")
+				msg.Nack(false, false)
+			case NackRequeue:
+				log.Println("Message requeued.")
+				msg.Nack(false, true)
 			}
 		}
 	}()
